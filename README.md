@@ -1,4 +1,4 @@
-# Bilibili-avbv-converter
+# BilibiliAvbvConverterApi
 
 轉換算法來源於 https://www.zhihu.com/question/381784377/answer/1099438784 原使用 WTFPL 許可證
 
