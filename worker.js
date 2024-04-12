@@ -8,13 +8,14 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 
+// ?action=av-bv&value=0
+
 // 添加事件监听器來處理請求
 addEventListener('fetch', event => {
   event.respondWith(handleRequest(event.request))
 })
 
-// 算法來源 https://www.zhihu.com/question/381784377/answer/1099438784 並使用 WTFPL 許可證
-// 感謝 WTFPL
+// 算法來源 https://www.zhihu.com/question/381784377/answer/1099438784
 
 // 固定值用於解碼和編碼
 const xorn = 177451812;
@@ -49,6 +50,17 @@ function enc(x) {
 
 // 處理請求的函數
 async function handleRequest(request) {
+  if (request.method === 'OPTIONS') {
+    return new Response(null, {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Max-Age': '86400',
+      },
+    })
+  }
+
   const url = new URL(request.url);
   const params = url.searchParams;
   const operation = params.get("action"); // 獲取操作類型
@@ -60,7 +72,7 @@ async function handleRequest(request) {
       const av = parseInt(value);
       const bv = enc(av);
       const responseObj = {
-        status: 200,
+        code: 200,
         msg: "success",
         action: "AV-BV",
         time: Date.now(),
@@ -70,13 +82,13 @@ async function handleRequest(request) {
        }
       };
       // 返回 JSON 格式的響應
-      return new Response(JSON.stringify(responseObj), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      return new Response(JSON.stringify(responseObj), { status: 200, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
     } else if (operation === "bv-av") {
       // 如果操作是 BV 號轉 AV 號
       const bv = value.toUpperCase().trim();
       const av = dec(bv);
       const responseObj = {
-        status: 200,
+        code: 200,
         msg: "success",
         action: "BV-AV",
         time: Date.now(),
@@ -86,7 +98,7 @@ async function handleRequest(request) {
         }
       };
       // 返回 JSON 格式的響應
-      return new Response(JSON.stringify(responseObj), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      return new Response(JSON.stringify(responseObj), { status: 200, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
     } else {
       // 如果操作不合法，拋出錯誤
       throw new Error("無效的操作。");
@@ -94,11 +106,11 @@ async function handleRequest(request) {
   } catch (err) {
     // 捕獲錯誤，返回錯誤信息
     const errorObj = {
-      status: 400,
+      code: 400,
       msg: err.message,
       timestamp: new Date().toISOString()
     };
     // 返回 JSON 格式的錯誤響應
-    return new Response(JSON.stringify(errorObj), { status: 400, headers: { 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify(errorObj), { status: 400, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
   }
 }
